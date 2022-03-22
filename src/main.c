@@ -1,5 +1,6 @@
 #include "graph.h"
 #include "bfs.h"
+#include "import.h"
 #include <stdio.h>
 
 // narazie tu jest test bfs / importu i exportu
