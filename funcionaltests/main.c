@@ -22,21 +22,25 @@
 
 int main(int argc, char** argv){
     graph* testgraph[11];
+    for (int i = 0; i < 11; i++){
+        testgraph[i] = NULL;
+    }
+    int errorflag;
     int correct_ef[11] = {11, 11, 11, 12, 12, 13, 14, 12, 14, 13, 0};
     char files[11][100] = {"graphs/blad1", "graphs/blad2", "graphs/blad3", "graphs/blad4", "graphs/blad5", "graphs/blad6", "graphs/blad7", "graphs/blad8", "", "graphs/blad10", "graphs/mygraph.txt" };
 
     for (int i = 0; i < 11; i++){
-        testgraph[i] = import_graph(files[i]);
+        errorflag = import_graph(files[i], &testgraph[i]);
         if (errorflag == correct_ef[i]){
-            printf("TEST %d: PASSED\n", i + 1);
+            printf("TEST %d: %d PASSED\n", i + 1, errorflag);
         }
         else{
             printf("TEST %d: %d FAILED\n", i + 1, errorflag);
         }
-        errorflag = 0;
     }
     
     for (int i = 0; i < 11; i++){
+        export_graph("graphs/lmao", testgraph[i]);
         free_graph(testgraph[i]);
     }
     return 0;

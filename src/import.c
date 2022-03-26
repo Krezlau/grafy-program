@@ -5,9 +5,9 @@
 
 // pomocne funkcje do importu
 
-int check_if_integer_greater_than(char temp[], int number){
+int check_if_integer_greater_than(char temp[], int number, int n){
     int i = 0;
-    while (temp[i] != '\0'){
+    while (i < n){
         if ((temp[i] < 48 || temp[i] > 57) && temp[i] != 45){
             return 0;
         }
@@ -19,10 +19,10 @@ int check_if_integer_greater_than(char temp[], int number){
     return 1;
 }
 
-int check_if_double_greater_than_zero(char* temp){
+int check_if_double_greater_than_zero(char* temp, int n){
     int i = 0;
     int dot_counter = 0;
-    while (temp[i] != '\0'){
+    while (i < n){
         if ((temp[i] < '0' || temp[i] > '9') && temp[i] != '.'){
             return 0;
         }
@@ -41,8 +41,8 @@ int check_if_double_greater_than_zero(char* temp){
 }
 
 // sprawdza czy wezly sa obok siebie w grafie
-int check_if_valid_connection(int current_node, char* temp, int number_of_rows, int number_of_col){
-    if (check_if_integer_greater_than(temp, -1)){
+int check_if_valid_connection(int current_node, char* temp, int number_of_rows, int number_of_col, int n){
+    if (check_if_integer_greater_than(temp, -1, n)){
         int node = atoi(temp);
         if (node < number_of_col * number_of_rows){
             int pos = check_node_position(current_node, number_of_rows, number_of_col);

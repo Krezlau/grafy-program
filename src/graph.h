@@ -1,8 +1,6 @@
 #ifndef _GRAPH_H
 #define _GRAPH_H
 
-extern int errorflag;
-
 typedef struct graph{
     int col; // kolumny
     int row; // rzedy
@@ -10,13 +8,13 @@ typedef struct graph{
     double** weights; // wagi krawedzi
 } graph;
 
-void reset_temp(char* temp, int i);
+void reset_temp(char* temp, int* i);
 
 graph* create_graph(int col, int row);
 
 void free_graph(graph* g);
 
-graph* import_graph(char* file_path);
+int import_graph(char* file_path, graph** loaded_graph);
 
 void export_graph(char* file_path, graph* g);
 
