@@ -4,13 +4,13 @@
 #include "graph.h"
 #include "import.h"
 
-int errorflag = 0;
 
 // pomocnicza do wczytywania danych z pliku
-void reset_temp(char* temp, int i){
-    while (i >= 0){
-        temp[i--] = '\0';
+void reset_temp(char* temp, int *i){
+    while((*i)--){
+        temp[(*i)] = '\0';
     }
+    (*i)++;
 }
 
 // mozliwe bledy:
@@ -71,25 +71,23 @@ void free_graph(graph* g){
 }
 
 // import z pliku
-graph* import_graph(char* file_path){
+int import_graph(char* file_path, graph** g){
+    graph* loaded_graph = NULL;
     FILE *in = fopen(file_path, "r");
     if (in == NULL){
-        errorflag = 14;
-        return NULL;
+        return 14;
     }
-    char temp[2048];
+    char *temp = (char*) malloc(2048 * sizeof(char));
     int c, j = 0;
     int line = 0;
     int i = 0;
     int row, col;
     
-    graph* loaded_graph = NULL;
     // wczytywanie liczby kolumn i wierszy
     int values_counter = 0;
     c = fgetc(in);
     if (c == EOF){
-        errorflag = 14;
-        return NULL;
+        return 14;
     }
     while(line == 0){
         if (c != ' ' && c != '\n'){
@@ -97,31 +95,26 @@ graph* import_graph(char* file_path){
         }
         else{
             if (values_counter == 0 || values_counter == 1){
-                if (check_if_integer_greater_than(temp, -1) == 1){
+                if (check_if_integer_greater_than(temp, -1, i) == 1){
                     if ( values_counter == 0){
                         col = atoi(temp);
                     }
                     else{
                         row = atoi(temp);
                     }
-                    reset_temp(temp, i);
-                    i = 0;
+                    reset_temp(temp, &i);
                     values_counter++;
                 }
                 else{
-                    reset_temp(temp, i);
-                    i = 0;
-                    errorflag = 11;
+                    reset_temp(temp, &i);
                     fclose(in);
-                    return NULL;
+                    return 11;
                 }
             }
             else{
-                reset_temp(temp, i);
-                i = 0;
-                errorflag = 11;
+                reset_temp(temp, &i);
                 fclose(in);
-                return NULL;
+                return 11;
             }
         }
         if(c == '\n'){
@@ -132,17 +125,13 @@ graph* import_graph(char* file_path){
     
     // tworzymy graf o podanych wymiarach
     loaded_graph = create_graph(col, row);
-    if (loaded_graph == NULL){
-        return loaded_graph;
-    }
+
     // wczytywanie poszczegolnych krawedzi
     c = fgetc(in);
     while (c != EOF){
         if (line > row*col){
-            reset_temp(temp, i);
-            i = 0;
-            errorflag = 12;
-            return NULL;
+            reset_temp(temp, &i);
+            return 12;
         }
         if (c == '\n'){
             line++;
@@ -158,66 +147,64 @@ graph* import_graph(char* file_path){
             c = fgetc(in);
             if (c == ':'){
                 // po liczbie wystepuje : wiec ta liczba to wezel z ktorym wystepuje krawedz
-                if (check_if_valid_connection(line-1, temp, row, col)){
+                if (check_if_valid_connection(line-1, temp, row, col, i)){
                     loaded_graph->links[line-1][j++] = atoi(temp);
-                    reset_temp(temp, i);
-                    i = 0;
+                    reset_temp(temp, &i);
                     // wczytujemy wage tej krawedzi
                     c = fgetc(in);
                     while (c != ' ' && c!= '\n'){
                         temp[i++] = c;
                         c = fgetc(in);
                     }
-                    if(check_if_double_greater_than_zero(temp)){
+                    if(check_if_double_greater_than_zero(temp, i)){
                         loaded_graph->weights[line-1][j-1] = strtod(temp, NULL); //strtod konwertuje na double
-                        reset_temp(temp, i);
-                        i = 0;
+                        reset_temp(temp, &i);
                         continue;
                     }
                     else{
-                        reset_temp(temp,i);
-                        errorflag = 13;
+                        reset_temp(temp, &i);
                         fclose(in);
-                        return NULL;
+                        return 13;
                     }
                 }
                 else{
-                    reset_temp(temp, i);
-                    errorflag = 12;
+                    reset_temp(temp, &i);
                     fclose(in);
-                    return NULL;
+                    return 12;
                 }
             }
             else{
                 // jesli nie ma dwukropka skladnia jest niepoprawna
                 fclose(in);
-                errorflag = 13;
-                return NULL;
+                return 13;
             }
         }
         c = fgetc(in);
     }
     fclose(in);
-    return loaded_graph;
+    *g = loaded_graph;
+    return 0;
 }
 
 // export do pliku
 void export_graph(char* file_path, graph* g){
-    FILE *out = fopen(file_path, "w");
-    int i, j;
+    if (g != NULL){
+        FILE *out = fopen(file_path, "w");
+        int i, j;
 
-    // kolumny i wiersze
-    fprintf(out, "%d %d\n", g->col, g->row); 
+        // kolumny i wiersze
+        fprintf(out, "%d %d\n", g->col, g->row); 
 
-    // poszczególne krawędzie
-    for (i = 0; i < g->col * g->row; i++){
-        fprintf(out, "\t");
-        j = 0;
-        while (g->links[i][j] != -1){
-            fprintf(out, " %d :%.16g ", g->links[i][j], g->weights[i][j]);
-            j++;
+        // poszczególne krawędzie
+        for (i = 0; i < g->col * g->row; i++){
+            fprintf(out, "\t");
+            j = 0;
+            while (g->links[i][j] != -1){
+                fprintf(out, " %d :%.16g ", g->links[i][j], g->weights[i][j]);
+                j++;
+            }
+            fprintf(out, "\n");
         }
-        fprintf(out, "\n");
+        fclose(out);
     }
-    fclose(out);
 }
