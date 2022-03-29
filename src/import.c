@@ -152,7 +152,7 @@ int check_node_position(int node, int number_of_rows, int number_of_col){
     if (node < number_of_rows){
         pos_x = -1;
     }
-    else if (node > number_of_col*number_of_rows - number_of_rows){
+    else if (node >= number_of_col*number_of_rows - number_of_rows){
         pos_x = 1;
     }
     else{

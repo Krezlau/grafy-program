@@ -1,44 +1,51 @@
 #include "bfs.h"
 #include "graph.h"
+#include "queue.h"
 #include <stdlib.h>
 #include <stdio.h>
 
 // przeszukiwanie grafu wszerz, by ustalic czy jest spojny
 int breadth_first_search(graph* g){
-    int* queue; // kolejka
+    queue* queue; // kolejka
     int* visited; // lista odwiedzonych wezlow
-    int q_counter = 0; // odpowiada za wyjmowanie z kolejki
-    int j = 0; // odpowiada za dodawania do kolejki
     int i, current_root;
     int rc = g->col * g->row;
+    int err;
+    int size;
 
-    queue = (int*) malloc(sizeof(int) * rc * 4); // to nie jest zbyt wydajne jesli chodzi o pamiec, ale dziala
+    if(g->col >= g->row){
+        size = g->row*2 - 1;
+    }
+    else{
+        size = g->col*2 + 1;
+    }
+
+    queue = create_queue(size); // z testow wynika ze taka wielkosc kolejki jest wystarczajaca
     visited = (int*) malloc(sizeof(int) * rc);
 
     for (i = 0; i < rc; i++){
         visited[i] = 0;
     }
 
-    for (i = 0; i < rc*4; i++){
-        queue[i] = -1;
-    }
-
     // zaczynamy od 0 wezla
     visited[0] = 1;
-    for (i = 0; i <= 4; i++){ // dodajemy do kolejki wezly z ktorymi jest polaczony
+    for (i = 0; i < 4; i++){ // dodajemy do kolejki wezly z ktorymi jest polaczony
         if (g->links[0][i] != -1){
-            queue[j++] = g->links[0][i];
+            err = enQueue(queue, g->links[0][i]);
         }
     }
 
-    while (queue[q_counter] != -1){
-        current_root = queue[q_counter++]; // bierzemy wezel z kolejki
+    while (!isEmpty(queue)){
+        err = deQueue(queue, &current_root); // bierzemy wezel z kolejki
         if (visited[current_root] != 1){ // sprawdzamy czy byl juz odwiedzany
             visited[current_root] = 1;
 
-            for (i = 0; i <= 4; i++){ // dodajemy do kolejki wezly polaczone z obecnym, jesli nie byly jeszcze odwiedzane
+            for (i = 0; i < 4; i++){ // dodajemy do kolejki wezly polaczone z obecnym, jesli nie byly jeszcze odwiedzane
                 if (g->links[current_root][i] != -1 && visited[g->links[current_root][i]] == 0){
-                queue[j++] = g->links[current_root][i];
+                    err = enQueue(queue, g->links[current_root][i]);
+                    if (err == -1){
+                        printf("enqueue failed aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+                    }
                 }
             }
         }
@@ -53,6 +60,6 @@ int breadth_first_search(graph* g){
         }
     }
     free(visited);
-    free(queue);
+    free_queue(queue);
     return 1;
 }
