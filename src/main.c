@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 	    opterr = 0;
 	    int array_of_user_input[10];
 		int err = 0;
-	    graph* loaded_graph = NULL;
+	    graph* loaded_graph;
 
 	while((opt = getopt (argc, argv, "k:w:f:t:i:bs:e:o:h")) != -1)
 	{
@@ -51,30 +51,29 @@ int main(int argc, char** argv)
 		{
 			case 'k':
 				number_of_columns = atoi(optarg);
-				array_of_user_input[0]++;
-				
+				array_of_user_input[0] = 1;
 				break;
 			case 'w':
 				number_of_rows = atoi(optarg);
-				array_of_user_input[1]++;
+				array_of_user_input[1] = 1;
 				break;
 			case 'f':
 				range_from = atof(optarg);
-				array_of_user_input[2]++;
+				array_of_user_input[2] = 1;
 				break;
 			case 't':
 				range_to = atof(optarg);
-				array_of_user_input[3]++;
+				array_of_user_input[3] = 1;
 				break;
 			case 'i':
 				input = optarg;
 				// tu nalezy jeszcze sie tym zajac
 				err = import_graph(input, &loaded_graph);
-				array_of_user_input[4]++;
+				array_of_user_input[4] = 1;
 				break;
 			case 'b':
 				is_bfs = 1;	
-				array_of_user_input[5]++;		
+				array_of_user_input[5] = 1;		
 				break;
 			case 's': //do dokonczenia dijkstra
 				starting_knot = atoi(optarg);
@@ -85,7 +84,7 @@ int main(int argc, char** argv)
 					fprintf(stderr, "\nWartosc pierwszego wezla nie moze byc mniejsza niz 0!\n");
 					exit(EXIT_FAILURE);
 				}
-				array_of_user_input[6]++;
+				array_of_user_input[6] = 1;
 			case 'e': //do dokonczenia dijkstra
 				ending_knot = atoi(optarg);
 				if(ending_knot >= 0)
@@ -95,10 +94,10 @@ int main(int argc, char** argv)
 					fprintf(stderr, "\nWartosc drugiego wezla nie moze byc mniejsza niz 0!\n");
 					exit(EXIT_FAILURE);
 				}
-				array_of_user_input[7]++;
+				array_of_user_input[7] = 1;
 			case 'o':
 				out = optarg;
-				array_of_user_input[8]++;
+				array_of_user_input[8] = 1;
 				break;
 			case 'h':
 				fprintf(stdout, instructions, Program_name);
@@ -126,6 +125,7 @@ int main(int argc, char** argv)
 	}
 	else 
     {
+		
 		if(array_of_user_input[0] == 1 && array_of_user_input[1] == 1 && array_of_user_input[2] == 1 && array_of_user_input[3] == 1)
         {
             ;
@@ -137,6 +137,15 @@ int main(int argc, char** argv)
         if(number_of_columns > 0 && number_of_rows > 0 && range_from >= 0 && range_to > 0)
         {
             loaded_graph = creating_graph( number_of_columns, number_of_rows, range_from, range_to);
+			int i, j;
+			for ( i = 0; i < number_of_columns * number_of_rows; i++){
+        		printf("\t");
+        		j = 0;
+        		for(j= 0; j < 4;j++){
+            	printf(" %d : %.10lf", loaded_graph->links[i][j],loaded_graph->weights[i][j]);
+        		}
+        		printf("\n");
+         		}
         }
         else
         {
@@ -162,8 +171,9 @@ int main(int argc, char** argv)
 		export_graph(out, loaded_graph);
 
 	}	
-    free_graph(loaded_graph);
+    
 
+	free_graph(loaded_graph);
 
     // graph* loaded_graph = import_graph("graphs/mygraph.txt");
     // export_graph("graphs/mygraph_out.txt", loaded_graph);
