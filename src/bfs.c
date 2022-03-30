@@ -14,7 +14,7 @@ int breadth_first_search(graph* g){
     int size;
 
     if(g->col >= g->row){
-        size = g->row*2 - 1;
+        size = g->row*2 + 1;
     }
     else{
         size = g->col*2 + 1;
