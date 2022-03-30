@@ -77,7 +77,7 @@ int import_graph(char* file_path, graph** g){
     if (in == NULL){
         return 14;
     }
-    char *temp = (char*) malloc(2048 * sizeof(char));
+    char *temp = (char*) calloc(2048, sizeof(char));
     int c, j = 0;
     int line = 0;
     int i = 0;
@@ -87,6 +87,7 @@ int import_graph(char* file_path, graph** g){
     int values_counter = 0;
     c = fgetc(in);
     if (c == EOF){
+        free(temp);
         return 14;
     }
     while(line == 0){
@@ -106,13 +107,13 @@ int import_graph(char* file_path, graph** g){
                     values_counter++;
                 }
                 else{
-                    reset_temp(temp, &i);
+                    free(temp);
                     fclose(in);
                     return 11;
                 }
             }
             else{
-                reset_temp(temp, &i);
+                free(temp);
                 fclose(in);
                 return 11;
             }
@@ -130,7 +131,7 @@ int import_graph(char* file_path, graph** g){
     c = fgetc(in);
     while (c != EOF){
         if (line > row*col){
-            reset_temp(temp, &i);
+            free(temp);
             return 12;
         }
         if (c == '\n'){
@@ -162,13 +163,13 @@ int import_graph(char* file_path, graph** g){
                         continue;
                     }
                     else{
-                        reset_temp(temp, &i);
+                        free(temp);
                         fclose(in);
                         return 13;
                     }
                 }
                 else{
-                    reset_temp(temp, &i);
+                    free(temp);
                     fclose(in);
                     return 12;
                 }
@@ -176,6 +177,7 @@ int import_graph(char* file_path, graph** g){
             else{
                 // jesli nie ma dwukropka skladnia jest niepoprawna
                 fclose(in);
+                free(temp);
                 return 13;
             }
         }
@@ -183,6 +185,7 @@ int import_graph(char* file_path, graph** g){
     }
     fclose(in);
     *g = loaded_graph;
+    free(temp);
     return 0;
 }
 
