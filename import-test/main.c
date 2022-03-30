@@ -60,23 +60,24 @@ int main(int argc, char** argv){
     int err;
     srand(time(NULL));
     graph* loaded_graph = NULL;
-    for (int i = 0; i < 1000; i++){
-        int x = rand()%100 + 1;
-        int y = rand()%100 + 1;
+    for (int i = 0; i < 100; i++){
+        int x = rand()%1000 + 1;
+        int y = rand()%1000 + 1;
         printf("generating graph: %d, %d\n", x, y);
-        loaded_graph = generate_graph(x, y, 1, 2);
+        loaded_graph = creating_graph(x, y, 1, 2);
         export_graph("graphs/lmao", loaded_graph);
         free_graph(loaded_graph);
         err = import_graph("graphs/lmao", &loaded_graph);
         if (err != 0){
             printf("err: %d\n", err);
-            return 1;
-        }
-        if(breadth_first_search(loaded_graph) == 1){
-            printf("TAK\n");
         }
         else{
-            printf("NIE\n");
+            if(breadth_first_search(loaded_graph) == 1){
+                printf("TAK\n");
+            }
+            else{
+                printf("NIE\n");
+            }
         }
         free_graph(loaded_graph);
     }

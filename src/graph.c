@@ -47,7 +47,7 @@ graph* create_graph(int col, int row){
             loaded_graph->links[i] = (int*) malloc(sizeof(int) * 4);
         }
         for (i = 0; i < rc; i++){
-            for (j = 0; j < 4; j++){
+            for (j = 0; j < 5; j++){
                 loaded_graph->links[i][j] = -1;
                 loaded_graph->weights[i][j] = -1;
             }
@@ -193,26 +193,21 @@ int import_graph(char* file_path, graph** g){
 void export_graph(char* file_path, graph* g){
     if (g != NULL){
         FILE *out = fopen(file_path, "w");
-        if (out != NULL){
-            int i, j;
+        int i, j;
 
-            // kolumny i wiersze
-            fprintf(out, "%d %d\n", g->col, g->row); 
+        // kolumny i wiersze
+        fprintf(out, "%d %d\n", g->row, g->col); 
 
-            // poszczególne krawędzie
-            for (i = 0; i < g->col * g->row; i++){
-                fprintf(out, "\t");
-                for (j = 0; j < 4; j++){
-                    if (g->links[i][j] != -1){
-                    fprintf(out, " %d :%.16g ", g->links[i][j], g->weights[i][j]);
-                    }
-                    else{
-                        break;
-                    }
-                }
-                fprintf(out, "\n");
+        // poszczególne krawędzie
+        for (i = 0; i < g->col * g->row; i++){
+            fprintf(out, "\t");
+            j = 0;
+            while ((g->links[i][j] != -1) && (j < 4)){
+                fprintf(out, " %d :%.16g ", g->links[i][j], g->weights[i][j]);
+                j++;
             }
-            fclose(out);
+            fprintf(out, "\n");
         }
+        fclose(out);
     }
 }
