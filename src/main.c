@@ -2,13 +2,14 @@
 #include "bfs.h"
 #include "import.h"
 #include "gen.h"
+#include "dijkstra.h"
+
 #include <stdio.h>
 #include <getopt.h>
 #include <stdlib.h>
 #include <ctype.h>
 
 
-// narazie tu jest test bfs / importu i exportu
 
 //Instrukcja obslugi argumentow wywolania programu
 char *instructions = 
@@ -67,7 +68,6 @@ int main(int argc, char** argv)
 				break;
 			case 'i':
 				input = optarg;
-				// tu nalezy jeszcze sie tym zajac
 				err = import_graph(input, &loaded_graph);
 				array_of_user_input[4] = 1;
 				break;
@@ -75,25 +75,11 @@ int main(int argc, char** argv)
 				is_bfs = 1;	
 				array_of_user_input[5] = 1;		
 				break;
-			case 's': //do dokonczenia dijkstra
+			case 's': 
 				starting_knot = atoi(optarg);
-				if(starting_knot >= 0)
-					break;
-				else
-				{
-					fprintf(stderr, "\nWartosc pierwszego wezla nie moze byc mniejsza niz 0!\n");
-					exit(EXIT_FAILURE);
-				}
 				array_of_user_input[6] = 1;
-			case 'e': //do dokonczenia dijkstra
+			case 'e': 
 				ending_knot = atoi(optarg);
-				if(ending_knot >= 0)
-					break;
-				else
-				{
-					fprintf(stderr, "\nWartosc drugiego wezla nie moze byc mniejsza niz 0!\n");
-					exit(EXIT_FAILURE);
-				}
 				array_of_user_input[7] = 1;
 			case 'o':
 				out = optarg;
@@ -104,53 +90,62 @@ int main(int argc, char** argv)
 				exit(EXIT_FAILURE);
 			
             default:
-            fprintf(stderr,"\nUzytkownik nie podal zadnych argumentow\n");
-            abort ();
+            fprintf(stderr,"\nUzytkownik podal argumenty w niewlasciwy sposob\n");
+			fprintf(stdout, instructions, Program_name);
+            return 3;
 		}
 	}
-	if(optind < argc)
-	{
-		fprintf(stderr, "\nZle parametry wywolania\n");
-		for( ;optind < argc; optind++)
-			fprintf(stderr, "\t\"%s\"\n", argv[optind]);
-		fprintf(stderr, "\n");
-		fprintf(stderr, instructions, Program_name);
-		exit(EXIT_FAILURE);
-	}	
+		
 	if(array_of_user_input[4] == 1)
 	{
-		// tu nalezy sie jeszcze tym zajac
+		
 		err = import_graph(input, &loaded_graph);
-
+		if(err == 11)
+		{
+			fprintf(stderr,"blad wymiaru(1,2,3)\n");
+			free_graph(loaded_graph);
+			return 11;
+		} 
+		else if(err == 12)
+		{
+			fprintf(stderr,"blad polaczenia wezlow(4,5,6)\n");
+			free_graph(loaded_graph);
+			return 12;
+		}
+		else if(err == 13)
+		{
+			fprintf(stderr,"blad zapisu wagi(6,10)\n");
+			free_graph(loaded_graph);
+			return 13;
+		}
+		else if(err == 14)
+		{
+			fprintf(stderr,"plik pusty lub nie istnieje(7,9)\n");
+			free_graph(loaded_graph);
+			return 14;
+		}
 	}
 	else 
     {
 		
-		if(array_of_user_input[0] == 1 && array_of_user_input[1] == 1 && array_of_user_input[2] == 1 && array_of_user_input[3] == 1)
-        {
-            ;
+		if(array_of_user_input[0] == 1 && array_of_user_input[1] == 1 && array_of_user_input[2] == 1 && array_of_user_input[3] == 1) // sprawdzamy czy uzytkownik podal wszystkie wartosci
+		{																															// do generacji grafu jesli nie to program generuje graf 
+            ;																														// uzywajac wartosci domyslnych
         }
         else
         {
-            fprintf(stdout, "\nUzytkownik nie podal wszystkich wartosci do generacji grafu \ndlatego wartosci ktorych nie podal uzytkownik zostana ustawione jako domyslne\nk = 10, w = 10, zakres od = 0, zakres do 1\n ");
+            fprintf(stdout, "\nUzytkownik nie podal wszystkich wartosci do generacji grafu \ndlatego wartosci ktorych nie podal uzytkownik zostana ustawione jako domyslne\nk = 10, w = 10, zakres od 0, zakres do 1\n ");
         }
-        if(number_of_columns > 0 && number_of_rows > 0 && range_from >= 0 && range_to > 0)
-        {
+        if(number_of_columns > 0 && number_of_rows > 0 && range_from >= 0 && range_to > 0) //jesli uzytkownik wprowadzil poprawne wartosci do generowania grafu 
+        {																					// to graf zostanie wygenerowany za pomoca funkcji creating_graph
             loaded_graph = creating_graph( number_of_columns, number_of_rows, range_from, range_to);
-			int i, j;
-			for ( i = 0; i < number_of_columns * number_of_rows; i++){
-        		printf("\t");
-        		j = 0;
-        		for(j= 0; j < 4;j++){
-            	printf(" %d : %.10lf", loaded_graph->links[i][j],loaded_graph->weights[i][j]);
-        		}
-        		printf("\n");
-         		}
+			
         }
         else
         {
-            fprintf(stderr,"\nUzytkownik podal wartosci ujemne!\nNalezy podac wartosci dodatnie\n");//uzytkownik chce zeby graf sie zrobil 0 x 0 lub range_to = 0
-            return 2;                                                                               //nie spelnia wymagan generacji grafu
+        	fprintf(stderr,"\nUzytkownik podal wartosci ujemne!\nNalezy podac wartosci dodatnie\n");//uzytkownik chce zeby graf sie zrobil 0 x 0 lub range_to = 0
+            free_graph(loaded_graph);																//nie spelnia wymagan generacji grafu
+			return 2;                                                                               
         }
 	}
 	
@@ -159,24 +154,58 @@ int main(int argc, char** argv)
 	{
 		if(breadth_first_search(loaded_graph) == 1)
 		{
-			fprintf(stdout, "graf jest spojny\n");    
+			fprintf(stdout, "\npodany graf jest spojny\n");    //stwierdzenie i wyswietlenie na ekran czy podany graf jest spojny czy nie
     	}
     	else
 		{
-        	fprintf(stdout, "graf jest niespojny\n");
+        	fprintf(stdout, "\npodany graf jest niespojny\n");
     	}
 	} 	
+	if(array_of_user_input[6] == 1 && array_of_user_input[7] == 1)
+	{
+		if(starting_knot >= 0 && ending_knot >= 0)
+		{
+			if(starting_knot > (number_of_columns * number_of_rows - 1) || ending_knot > (number_of_columns * number_of_rows - 1))
+			{
+				fprintf(stderr,"\nWartosci szukanych wezlow musza istniec!\n");
+				return 7;
+			}
+			vertex_links_result(starting_knot, ending_knot, loaded_graph);//przekaz wezel poczatkowy i koncowy do dijk zeby poszukac najkrotszej drogi
+																		  //wyswietla na stdout wezel poczatkowy i koncowy oraz sume wag krawedzi pomiedzy nimi
+		}
+		else
+		{
+			if(starting_knot < 0 && ending_knot < 0)
+			{
+				fprintf(stderr,"\nWartosci wezlow nie moga byc ujemne!\n");
+				return 6;
+			}
+			if(starting_knot >= 0)
+				;
+			else
+			{
+				fprintf(stderr, "\nWartosc poczatkowego wezla nie moze byc mniejsza niz 0!\n");
+				return 4;
+			}
+	
+			if(ending_knot >= 0)
+				;
+			else
+			{
+				fprintf(stderr, "\nWartosc koncowego wezla nie moze byc mniejsza niz 0!\n");
+				return 5;
+			}
+		}
+	}
     if(array_of_user_input[8] == 1)
 	{
-		export_graph(out, loaded_graph);
+		export_graph(out, loaded_graph); //eksport grafu do pliku
 
 	}	
     
 
 	free_graph(loaded_graph);
 
-    // graph* loaded_graph = import_graph("graphs/mygraph.txt");
-    // export_graph("graphs/mygraph_out.txt", loaded_graph);
-    // free_graph(loaded_graph);
+    
     return 0;
 }
