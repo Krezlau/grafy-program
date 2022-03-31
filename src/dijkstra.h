@@ -77,10 +77,8 @@ void vertex_links_result(int start, int end, graph* g); //funkcja wywolujaca alg
 
 void converter_graph(graph* g, struct Graph* newgraph); //konwerter grafow
 
-// void deleteList(struct AdjListNode** head_ref);
+void free_tempGraph(struct Graph* temp_graph);
 
-
-
-
+void free_MinHeap(struct MinHeap* min_heap);
 
 #endif
