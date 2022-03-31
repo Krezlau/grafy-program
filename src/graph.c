@@ -47,7 +47,7 @@ graph* create_graph(int col, int row){
             loaded_graph->links[i] = (int*) malloc(sizeof(int) * 4);
         }
         for (i = 0; i < rc; i++){
-            for (j = 0; j < 5; j++){
+            for (j = 0; j < 4; j++){
                 loaded_graph->links[i][j] = -1;
                 loaded_graph->weights[i][j] = -1;
             }
@@ -71,8 +71,7 @@ void free_graph(graph* g){
 }
 
 // import z pliku
-int import_graph(char* file_path, graph** g){
-    graph* loaded_graph = NULL;
+int import_graph(char* file_path, graph** loaded_graph){
     FILE *in = fopen(file_path, "r");
     if (in == NULL){
         return 14;
@@ -88,6 +87,7 @@ int import_graph(char* file_path, graph** g){
     c = fgetc(in);
     if (c == EOF){
         free(temp);
+        fclose(in);
         return 14;
     }
     while(line == 0){
@@ -98,10 +98,10 @@ int import_graph(char* file_path, graph** g){
             if (values_counter == 0 || values_counter == 1){
                 if (check_if_integer_greater_than(temp, -1, i) == 1){
                     if ( values_counter == 0){
-                        col = atoi(temp);
+                        row = atoi(temp);
                     }
                     else{
-                        row = atoi(temp);
+                        col = atoi(temp);
                     }
                     reset_temp(temp, &i);
                     values_counter++;
@@ -125,13 +125,14 @@ int import_graph(char* file_path, graph** g){
     }
     
     // tworzymy graf o podanych wymiarach
-    loaded_graph = create_graph(col, row);
+    (*loaded_graph) = create_graph(col, row);
 
     // wczytywanie poszczegolnych krawedzi
     c = fgetc(in);
     while (c != EOF){
         if (line > row*col){
             free(temp);
+            fclose(in);
             return 12;
         }
         if (c == '\n'){
@@ -148,8 +149,8 @@ int import_graph(char* file_path, graph** g){
             c = fgetc(in);
             if (c == ':'){
                 // po liczbie wystepuje : wiec ta liczba to wezel z ktorym wystepuje krawedz
-                if (check_if_valid_connection(line-1, temp, row, col, i)){
-                    loaded_graph->links[line-1][j++] = atoi(temp);
+                if (check_if_valid_connection(line-1, temp, col, row, i)){
+                    (*loaded_graph)->links[line-1][j++] = atoi(temp);
                     reset_temp(temp, &i);
                     // wczytujemy wage tej krawedzi
                     c = fgetc(in);
@@ -158,7 +159,7 @@ int import_graph(char* file_path, graph** g){
                         c = fgetc(in);
                     }
                     if(check_if_double_greater_than_zero(temp, i)){
-                        loaded_graph->weights[line-1][j-1] = strtod(temp, NULL); //strtod konwertuje na double
+                        (*loaded_graph)->weights[line-1][j-1] = strtod(temp, NULL); //strtod konwertuje na double
                         reset_temp(temp, &i);
                         continue;
                     }
@@ -184,30 +185,36 @@ int import_graph(char* file_path, graph** g){
         c = fgetc(in);
     }
     fclose(in);
-    *g = loaded_graph;
     free(temp);
     return 0;
 }
 
 // export do pliku
-void export_graph(char* file_path, graph* g){
+int export_graph(char* file_path, graph* g){
     if (g != NULL){
         FILE *out = fopen(file_path, "w");
-        int i, j;
+        if (out != NULL){
+            int i, j;
 
-        // kolumny i wiersze
-        fprintf(out, "%d %d\n", g->row, g->col); 
+            // kolumny i wiersze
+            fprintf(out, "%d %d\n", g->row, g->col); 
 
-        // poszczególne krawędzie
-        for (i = 0; i < g->col * g->row; i++){
-            fprintf(out, "\t");
-            j = 0;
-            while ((g->links[i][j] != -1) && (j < 4)){
-                fprintf(out, " %d :%.16g ", g->links[i][j], g->weights[i][j]);
-                j++;
+            // poszczególne krawędzie
+            for (i = 0; i < g->col * g->row; i++){
+                fprintf(out, "\t");
+                j = 0;
+                while ((j < 4) && (g->links[i][j] != -1)){
+                    fprintf(out, " %d :%.16g ", g->links[i][j], g->weights[i][j]);
+                    j++;
+                }
+                fprintf(out, "\n");
             }
-            fprintf(out, "\n");
+            fclose(out);
+            return 0;
         }
-        fclose(out);
+        else{
+            return -1;
+        }
     }
+    return -2;
 }

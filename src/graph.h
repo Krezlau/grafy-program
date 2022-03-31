@@ -16,6 +16,6 @@ void free_graph(graph* g);
 
 int import_graph(char* file_path, graph** loaded_graph);
 
-void export_graph(char* file_path, graph* g);
+int export_graph(char* file_path, graph* g);
 
 #endif
