@@ -224,37 +224,8 @@ void dijkstra(struct Graph* graph, int start, int end) //glowna funkcja algorytm
     free_MinHeap(min_heap);
  
     printing_function(weights, V, start, end);
-    // deleteList(&node_of_min_heap); //proba zwalniania pamieci
-    //free_list(&pCrawl);
+    
 }
-
-//proba zwalniania pamieci
-// void deleteList(struct AdjListNode** head_ref)
-// {
-//    /* deref head_ref to get the real head */
-//    struct AdjListNode* current = *head_ref;
-//    struct AdjListNode* next;
- 
-//    while (current != NULL)
-//    {
-//        next = current->next;
-//        free(current);
-//        current = next;
-//    }
-   
-//    /* deref head_ref to affect the real head back
-//       in the caller. */
-//    *head_ref = NULL;
-// }
-/*
-void free_list(struct AdjList list){
-    struct AdjList* current = &list;
-
-    while (current != NULL){
-        free(current);
-    }
-}
-*/
 
 void free_MinHeap(struct MinHeap* min_heap){
     free(min_heap->pos);
