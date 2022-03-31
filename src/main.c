@@ -81,9 +81,11 @@ int main(int argc, char** argv)
 			case 's': 
 				starting_knot = atoi(optarg);
 				array_of_user_input[6] = 1;
+				break;
 			case 'e': 
 				ending_knot = atoi(optarg);
 				array_of_user_input[7] = 1;
+				break;
 			case 'o':
 				out = optarg;
 				array_of_user_input[8] = 1;
@@ -95,7 +97,7 @@ int main(int argc, char** argv)
             default:
             fprintf(stderr,"\nUzytkownik podal argumenty w niewlasciwy sposob\n");
 			fprintf(stdout, instructions, Program_name);
-            return 3;
+            return 22;
 		}
 	}
 		
@@ -148,7 +150,7 @@ int main(int argc, char** argv)
         {
         	fprintf(stderr,"\nUzytkownik podal wartosci ujemne!\nNalezy podac wartosci dodatnie\n");//uzytkownik chce zeby graf sie zrobil 0 x 0 lub range_to = 0
             free_graph(loaded_graph);																//nie spelnia wymagan generacji grafu
-			return 2;                                                                               
+			return 25;                                                                               
         }
 	}
 	
@@ -171,7 +173,7 @@ int main(int argc, char** argv)
 			if(starting_knot > (number_of_columns * number_of_rows - 1) || ending_knot > (number_of_columns * number_of_rows - 1))
 			{
 				fprintf(stderr,"\nWartosci szukanych wezlow musza istniec!\n");
-				return 7;
+				return 25;
 			}
 			vertex_links_result(starting_knot, ending_knot, loaded_graph);//przekaz wezel poczatkowy i koncowy do dijk zeby poszukac najkrotszej drogi
 																		  //wyswietla na stdout wezel poczatkowy i koncowy oraz sume wag krawedzi pomiedzy nimi
@@ -181,14 +183,14 @@ int main(int argc, char** argv)
 			if(starting_knot < 0 && ending_knot < 0)
 			{
 				fprintf(stderr,"\nWartosci wezlow nie moga byc ujemne!\n");
-				return 6;
+				return 25;
 			}
 			if(starting_knot >= 0)
 				;
 			else
 			{
 				fprintf(stderr, "\nWartosc poczatkowego wezla nie moze byc mniejsza niz 0!\n");
-				return 4;
+				return 25;
 			}
 	
 			if(ending_knot >= 0)
@@ -196,7 +198,7 @@ int main(int argc, char** argv)
 			else
 			{
 				fprintf(stderr, "\nWartosc koncowego wezla nie moze byc mniejsza niz 0!\n");
-				return 5;
+				return 25;
 			}
 		}
 	}
