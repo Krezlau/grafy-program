@@ -43,10 +43,13 @@ int main(int argc, char** argv)
 		int ending_knot = 0;
 	    opterr = 0;
 	    int array_of_user_input[10];
+		for (int i = 0; i < 10; i++){
+			array_of_user_input[i] = 0;
+		}
 		int err = 0;
 	    graph* loaded_graph;
 
-	while((opt = getopt (argc, argv, "k:w:f:t:i:b:s:e:o:h")) != -1)
+	while((opt = getopt (argc, argv, "k:w:f:t:i:bs:e:o:h")) != -1)
 	{
 		switch (opt)
 		{
@@ -68,6 +71,7 @@ int main(int argc, char** argv)
 				break;
 			case 'i':
 				input = optarg;
+				err = import_graph(input, &loaded_graph);
 				array_of_user_input[4] = 1;
 				break;
 			case 'b':
