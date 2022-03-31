@@ -12,7 +12,7 @@ void vertex_links_result(int start, int end, graph* g) //funkcja wywolujaca algo
     struct Graph* graph = create_temp_graph(V);
     converter_graph( g,  graph);
     dijkstra(graph, start, end); //glowna funkcja algorytmu Dijkstry
-      
+    free_tempGraph(graph);
 }
 
 void converter_graph(graph* g, struct Graph* newgraph) //konwerter grafow
@@ -21,7 +21,7 @@ void converter_graph(graph* g, struct Graph* newgraph) //konwerter grafow
         for (i = 0; i < g->col * g->row; i++)
         {
             j = 0;
-            while ((g->links[i][j] != -1) && (j < 4))
+            while ((j < 4) && (g->links[i][j] != -1))
             {
                 add_edge_to_graph(  newgraph, i, g->links[i][j], g->weights[i][j]);
                 j++;
@@ -135,7 +135,6 @@ struct MinHeapNode* extract_node_from_min_heap(struct MinHeap* min_heap) //wycia
     min_heap->pos[root->v] = min_heap->size-1; //zaaktualizuj pozycje ostatniego wezla
     min_heap->pos[lastNode->v] = 0;
  
-    
     --min_heap->size; //zwolnij niepotrzebne miejsce
     positions_of_min_heap(min_heap, 0);
  
@@ -188,6 +187,8 @@ void dijkstra(struct Graph* graph, int start, int end) //glowna funkcja algorytm
     int V = graph->V; //potrzebujemy ilosc wierzcholkow (bierzemy ja z iloczynu kolumny razy wiersze)
    
     double weights[V];    
+
+    int j = 0;
  
     struct MinHeap* min_heap = create_min_heap(V);
     for (int v = 0; v < V; ++v)
@@ -196,6 +197,7 @@ void dijkstra(struct Graph* graph, int start, int end) //glowna funkcja algorytm
         min_heap->array[v] = add_node_to_min_heap(v, weights[v]); //
         min_heap->pos[v] = v;
     }
+    free(min_heap->array[start]);
     min_heap->array[start] = add_node_to_min_heap(start, weights[start]);
     min_heap->pos[start] = start;
     weights[start] = 0;
@@ -204,6 +206,7 @@ void dijkstra(struct Graph* graph, int start, int end) //glowna funkcja algorytm
     while (!is_min_heap_empty(min_heap))
     {
         struct MinHeapNode* node_of_min_heap = extract_node_from_min_heap(min_heap);
+        j++;
         int u = node_of_min_heap->v;
         struct AdjListNode* pCrawl = graph->array[u].head;
         while (pCrawl != NULL)
@@ -216,10 +219,13 @@ void dijkstra(struct Graph* graph, int start, int end) //glowna funkcja algorytm
             }
             pCrawl = pCrawl->next;
         }
+        free(node_of_min_heap);
     }
+    free_MinHeap(min_heap);
  
     printing_function(weights, V, start, end);
     // deleteList(&node_of_min_heap); //proba zwalniania pamieci
+    //free_list(&pCrawl);
 }
 
 //proba zwalniania pamieci
@@ -240,3 +246,31 @@ void dijkstra(struct Graph* graph, int start, int end) //glowna funkcja algorytm
 //       in the caller. */
 //    *head_ref = NULL;
 // }
+/*
+void free_list(struct AdjList list){
+    struct AdjList* current = &list;
+
+    while (current != NULL){
+        free(current);
+    }
+}
+*/
+
+void free_MinHeap(struct MinHeap* min_heap){
+    free(min_heap->pos);
+    free(min_heap->array);
+    free(min_heap);
+}
+
+void free_tempGraph(struct Graph* temp_graph){
+    struct AdjListNode* tmp;
+    for (int i = 0; i < temp_graph->V; ++i){
+        while (temp_graph->array[i].head != NULL){
+            tmp = temp_graph->array[i].head;
+            temp_graph->array[i].head = temp_graph->array[i].head->next;
+            free(tmp);
+        }
+    }
+    free(temp_graph->array);
+    free(temp_graph);
+}

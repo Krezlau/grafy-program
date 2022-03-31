@@ -67,7 +67,7 @@ graph* creating_graph(int col, int row, double start_range, double end_range){
     int i, j, k, l = 0;
     int rc = row * col;
     int **array_of_links = array_of_links_generator(col, row);
-    int *visited = malloc(4 * sizeof(int));
+    int *visited = calloc(4, sizeof(int));
     srand(time(NULL));
     graph* loaded_graph = (graph*) malloc(sizeof(graph));
     if (loaded_graph != NULL) {
@@ -98,5 +98,10 @@ graph* creating_graph(int col, int row, double start_range, double end_range){
             }
         }
     }
+    for (i = 0; i < row; i++){
+        free(array_of_links[i]);
+    }
+    free(array_of_links);
+    free(visited);
     return loaded_graph;
 }
